@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <Windows.h>
 
+#include "BusStop.h"
 
 
 int main()
