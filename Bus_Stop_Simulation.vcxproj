@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClInclude Include="BusStop.h" />
     <ClInclude Include="Data.h" />
+    <ClInclude Include="Func.h" />
     <ClInclude Include="Queue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
