@@ -55,7 +55,7 @@ void SetColor(int text, int background)
 
 void gotoxy(int x, int y)
 {
-	COORD coord;
+	COORD coord{};
 	coord.X = x;
 	coord.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
