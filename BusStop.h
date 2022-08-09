@@ -16,20 +16,43 @@ public:
 	friend ostream& operator<<(ostream& out, const People& p);
 };
 
+class Bus
+{
+	//загальна кількість вільних місць
+	int places = 15;
 
+public:
+	Bus() {};
+	int getFreePlaces();
+
+};
 
 class busStop
 {
+
 	PriorityQueue<People> qPeople;
-	
+	Queue<Bus> qBus;
+
+	//Час необхідний автобусу для проїзду за маршрутом (60хвилин)
+	const int timeWay = 60;
+	const int maxWaitPeople = 10;
+	int fPlaceInBus{};
+
 	//метод очищення екрану
 	void clrscr();
 	//вивести чергу
 	void print() const;
 	//Додати людей у чергу
 	void addEnqueToBus(const People& p);
+	//Додати автобус
+	void addBusEnque(const Bus& b);
+	//Видалити автобус
+	void delBusEnque(const Bus& b);
+
 	//скільки людей різних категорій у черзі
 	void printCategory();
+	void printBusInfo();
+
 
 public:
 	busStop() { }
@@ -43,6 +66,19 @@ void busStop::addEnqueToBus(const People& p)
 {
 	qPeople.enqueue(p, p.getPriority());
 }
+
+//Додати автобус
+void busStop::addBusEnque(const Bus& b)
+{
+	qBus.enqueue(b);
+}
+
+//Видалити автобус
+void busStop::delBusEnque(const Bus& b)
+{
+	qBus.dequeue();
+}
+
 //Гетер пріорітету
 PRIORITY People::getPriority() const
 {
@@ -118,16 +154,31 @@ void busStop::printCategory()
 
 }
 
+void busStop::printBusInfo()
+{
+	gotoxy(0, 0);
+	cout << "---------------------------------------------\n";
+	gotoxy(0, 1);
+	cout << "Кількість автобусів на маршруті: " << qBus.length() << '\n';
+	cout << "Середній час очікування автобусу: " << timeWay / qBus.length() << "  хвилин\n";
+	cout << "Вільних місць у автобусі, що наближається  " << fPlaceInBus << '\n';
+}
+
 void busStop::startSimulation()
 {
 	Time t;
-
+	int tWaitBus{};
 	string peopleCategory[] = { "Пенсіонер","Вагітна", "Звичайна людина" };
+
+	addBusEnque(Bus());
 
 	while (true)
 	{
 		t.setupTime();
 		t.showTime();
+		
+		tWaitBus = timeWay / qBus.length();
+		
 		
 		//Умова залежності часу симуляції та пасажиропотоку
 		if (t.getHour() >= 0 && t.getHour() <= 5)
@@ -137,8 +188,10 @@ void busStop::startSimulation()
 		}
 		else if (t.getHour() > 5 && t.getHour() <= 10)
 		{
-			if (t.elapsedM() % 5 == 0)
+			if (t.elapsedM() % 2 == 0)
+			{
 				addEnqueToBus(People((peopleCategory[random()])));
+			}
 		}
 		else if (t.getHour() > 10 && t.getHour() <= 16)
 		{
@@ -148,7 +201,10 @@ void busStop::startSimulation()
 		else if (t.getHour() > 16 && t.getHour() <= 20)
 		{
 			if (t.elapsedM() % 5 == 0)
+			{
 				addEnqueToBus(People((peopleCategory[random()])));
+				addEnqueToBus(People((peopleCategory[random()])));
+			}
 		}
 		else if (t.getHour() > 20 && t.getHour() <= 23)
 		{
@@ -156,13 +212,29 @@ void busStop::startSimulation()
 				addEnqueToBus(People((peopleCategory[random()])));
 		}
 
+		if (t.elapsedM() % tWaitBus == 0)
+		{
+			fPlaceInBus = qBus.peek().getFreePlaces();
 
+			for(size_t i{}; i < fPlaceInBus; i++)
+				qPeople.dequeue();
+
+			qBus.ring();
+
+			if (qPeople.length() >= maxWaitPeople)
+				addBusEnque(Bus());
+			else if ((qPeople.length() < maxWaitPeople && qBus.length() >= 2))
+				delBusEnque(Bus());
+		}
+
+
+		printBusInfo();
 		printCategory();
+
 
 		//прискорення часу
 		t.addTime(1);
-
-		Sleep(100);
+		Sleep(50);
 		clrscr();
 	}
 }
@@ -186,4 +258,7 @@ void busStop::clrscr()
 	cout << "    \n";
 }
 
-
+int Bus::getFreePlaces()
+{
+	return randMax(places);
+}

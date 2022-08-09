@@ -22,7 +22,7 @@ public:
 //Сетер часу
 void Time::setupTime()
 {
-	s = time(0) - zerotime;
+	//s = time(0) - zerotime;
 
 	if (s == 60)
 	{

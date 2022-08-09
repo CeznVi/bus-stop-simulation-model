@@ -75,3 +75,9 @@ int random()
 	else
 		return 2;
 }
+
+//Рандомайзер між 0 та МАКС
+int randMax(int max)
+{
+	return rand() % max + 1;
+}
