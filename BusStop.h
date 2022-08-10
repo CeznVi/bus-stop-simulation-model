@@ -24,6 +24,7 @@ class Bus
 public:
 	Bus() {};
 	int getFreePlaces();
+	int getPlaces() { return places; }
 
 };
 
@@ -58,6 +59,7 @@ public:
 	busStop() { }
 	//основний метод
 	void startSimulation();
+	
 
 };
 
@@ -149,9 +151,6 @@ void busStop::printCategory()
 	gotoxy(89, 7);
 	cout << "------------------------------\n";
 
-
-
-
 }
 
 void busStop::printBusInfo()
@@ -161,7 +160,15 @@ void busStop::printBusInfo()
 	gotoxy(0, 1);
 	cout << "Кількість автобусів на маршруті: " << qBus.length() << '\n';
 	cout << "Середній час очікування автобусу: " << timeWay / qBus.length() << "  хвилин\n";
+	cout << "Пасажиромісткість автобусу:  " << qBus.peek().getPlaces() << " міст\n";
 	cout << "Вільних місць у автобусі, що наближається  " << fPlaceInBus << '\n';
+	cout << "---------------------------------------------\n";
+
+	for (int i{}; i < 6; i++)
+	{
+		gotoxy(45, i);
+		cout << "|\n";
+	}
 }
 
 void busStop::startSimulation()
@@ -172,14 +179,14 @@ void busStop::startSimulation()
 
 	addBusEnque(Bus());
 
+	int hmPeople{};
+
 	while (true)
 	{
 		t.setupTime();
 		t.showTime();
-		
 		tWaitBus = timeWay / qBus.length();
-		
-		
+				
 		//Умова залежності часу симуляції та пасажиропотоку
 		if (t.getHour() >= 0 && t.getHour() <= 5)
 		{
@@ -216,17 +223,20 @@ void busStop::startSimulation()
 		{
 			fPlaceInBus = qBus.peek().getFreePlaces();
 
-			for(size_t i{}; i < fPlaceInBus; i++)
+			for (size_t i{}; i < fPlaceInBus; i++)
 				qPeople.dequeue();
-
+					
+			//system("pause");
 			qBus.ring();
+		}
 
+		if (t.elapsedM() % timeWay == 0)
+		{
 			if (qPeople.length() >= maxWaitPeople)
 				addBusEnque(Bus());
 			else if ((qPeople.length() < maxWaitPeople && qBus.length() >= 2))
 				delBusEnque(Bus());
 		}
-
 
 		printBusInfo();
 		printCategory();
@@ -234,7 +244,7 @@ void busStop::startSimulation()
 
 		//прискорення часу
 		t.addTime(1);
-		Sleep(50);
+		Sleep(200);
 		clrscr();
 	}
 }
@@ -242,6 +252,14 @@ void busStop::startSimulation()
 //очисник активних полів екрану
 void busStop::clrscr()
 {
+	//чистка активних полів автобусного інформера
+	gotoxy(33, 1);
+	cout << "   \n";
+	gotoxy(34, 2);
+	cout << "   \n";
+	gotoxy(43, 4);
+	cout << "   \n";
+
 	//чистка активних полів годинника
 	gotoxy(72, 3);
 	cout << "  \n";
