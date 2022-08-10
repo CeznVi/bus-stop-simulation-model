@@ -30,7 +30,6 @@ public:
 
 class busStop
 {
-
 	PriorityQueue<People> qPeople;
 	Queue<Bus> qBus;
 
@@ -54,12 +53,10 @@ class busStop
 	void printCategory();
 	void printBusInfo();
 
-
 public:
 	busStop() { }
 	//основний метод
 	void startSimulation();
-	
 
 };
 
@@ -91,6 +88,7 @@ PRIORITY People::getPriority() const
 	if (category == "Звичайна людина")
 		return PRIORITY::LOW;
 }
+
 //Друк черги
 void busStop::print() const
 {
@@ -153,6 +151,7 @@ void busStop::printCategory()
 
 }
 
+//друк інформації стосовно автобусів на маршрутці
 void busStop::printBusInfo()
 {
 	gotoxy(0, 0);
@@ -164,6 +163,16 @@ void busStop::printBusInfo()
 	cout << "Вільних місць у автобусі, що наближається  " << fPlaceInBus << '\n';
 	cout << "---------------------------------------------\n";
 
+	gotoxy(45, 0);
+	cout << "------------------------\n";
+	gotoxy(53, 1);
+	cout << "Симулятор\n";
+	gotoxy(53, 2);
+	cout << "автобусної\n";
+	gotoxy(54, 3);
+	cout << "зупинки\n";
+	gotoxy(45, 5);
+	cout << "------------------------\n";
 	for (int i{}; i < 6; i++)
 	{
 		gotoxy(45, i);
@@ -171,6 +180,7 @@ void busStop::printBusInfo()
 	}
 }
 
+//основний робочий метод
 void busStop::startSimulation()
 {
 	Time t;
@@ -178,8 +188,6 @@ void busStop::startSimulation()
 	string peopleCategory[] = { "Пенсіонер","Вагітна", "Звичайна людина" };
 
 	addBusEnque(Bus());
-
-	int hmPeople{};
 
 	while (true)
 	{
@@ -202,23 +210,23 @@ void busStop::startSimulation()
 		}
 		else if (t.getHour() > 10 && t.getHour() <= 16)
 		{
-			if (t.elapsedM() % 10 == 0)
+			if (t.elapsedM() % 5 == 0)
 				addEnqueToBus(People((peopleCategory[random()])));
 		}
 		else if (t.getHour() > 16 && t.getHour() <= 20)
 		{
-			if (t.elapsedM() % 5 == 0)
+			if (t.elapsedM() % 2 == 0)
 			{
-				addEnqueToBus(People((peopleCategory[random()])));
 				addEnqueToBus(People((peopleCategory[random()])));
 			}
 		}
 		else if (t.getHour() > 20 && t.getHour() <= 23)
 		{
-			if (t.elapsedM() % 40 == 0)
+			if (t.elapsedM() % 20 == 0)
 				addEnqueToBus(People((peopleCategory[random()])));
 		}
 
+		//видалення людей із черги (приїзд автобуса--люди сідають у автобус)
 		if (t.elapsedM() % tWaitBus == 0)
 		{
 			fPlaceInBus = qBus.peek().getFreePlaces();
@@ -230,21 +238,66 @@ void busStop::startSimulation()
 			qBus.ring();
 		}
 
+		//Аналіз кількості очікуючіх пасажирів на остановці після повного кругу автобуса, якщо пасажирів
+		//більше за maxWaitPeople то згідно умов додається певна кількість автобусі, також і навпаки 
+		//є можливість і зменьшувати кількість автобусів на маршруті
 		if (t.elapsedM() % timeWay == 0)
 		{
 			if (qPeople.length() >= maxWaitPeople)
-				addBusEnque(Bus());
+				if (qPeople.length() >= maxWaitPeople && qPeople.length() <= maxWaitPeople * 2)
+				{
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+				}
+				else if (qPeople.length() > maxWaitPeople * 2 && qPeople.length() <= maxWaitPeople * 3)
+				{
+					addBusEnque(Bus()); 
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+				}
+				else if (qPeople.length() > maxWaitPeople * 3 && qPeople.length() <= maxWaitPeople * 4)
+				{
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+				}
+				else
+				{
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+					addBusEnque(Bus());
+				}
 			else if ((qPeople.length() < maxWaitPeople && qBus.length() >= 2))
-				delBusEnque(Bus());
+				if (qBus.length() >= 3 && qBus.length() <= 5)
+				{
+					delBusEnque(Bus());
+					delBusEnque(Bus());
+				}
+				else if (qBus.length() > 5 && qBus.length() <= 7)
+				{
+					delBusEnque(Bus());
+					delBusEnque(Bus());
+					delBusEnque(Bus());
+				}
+				else 
+					delBusEnque(Bus());
+
 		}
 
 		printBusInfo();
 		printCategory();
 
-
-		//прискорення часу
+		//в одному циклі - 1 хв
 		t.addTime(1);
-		Sleep(200);
+		//"тривалість" циклу з реалізіцією через фу-цію сну
+		Sleep(200); //200
 		clrscr();
 	}
 }

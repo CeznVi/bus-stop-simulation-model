@@ -54,6 +54,7 @@ void Time::setT()
 //Скільки часу минуло
 void Time::showTime() const
 {
+
 	gotoxy(70, 0);
 	cout << "------------------\n";
 	gotoxy(70, 1);
@@ -64,8 +65,14 @@ void Time::showTime() const
 	cout << h;
 	gotoxy(80, 3);
 	cout << m;
-	gotoxy(70, 4);
+	gotoxy(70, 5);
 	cout << "------------------\n";
+
+	for (int i{}; i < 6; i++)
+	{
+		gotoxy(69, i);
+		cout << "|\n";
+	}
 }
 
 //Скільки хвилин минуло
